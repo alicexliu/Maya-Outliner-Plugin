@@ -1,5 +1,4 @@
 import sys
-from maya.cmds import cmds
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaUI as OpenMayaUI
 
@@ -9,7 +8,7 @@ def maya_useNewAPI():
 
 # command
 class Py2HelloWorldCmd(om.MPxCommand):
-    kPluginCmdName = "py2HelloWorld"
+    kPluginCmdName = "py2outlinerManager"
 
     def __init__(self):
         om.MPxCommand.__init__(self)
@@ -22,27 +21,22 @@ class Py2HelloWorldCmd(om.MPxCommand):
         print ("Hello World!")
 
 
-# Initialize the plug-in
 def initializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:
         pluginFn.registerCommand(
-            Py2HelloWorldCmd.kPluginCmdName, Py2HelloWorldCmd.cmdCreator
+            Py2HelloWorldCmd.kPluginCmdName,
+            Py2HelloWorldCmd.cmdCreator
         )
-    except:
-        sys.stderr.write(
-            "Failed to register command: %s\n" % Py2HelloWorldCmd.kPluginCmdName
-        )
-    raise
+    except Exception as e:
+        sys.stderr.write(f"Failed to register command: {Py2HelloWorldCmd.kPluginCmdName}\n")
+        raise e
 
 
-# Uninitialize the plug-in
 def uninitializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:
         pluginFn.deregisterCommand(Py2HelloWorldCmd.kPluginCmdName)
-    except:
-        sys.stderr.write(
-            "Failed to unregister command: %s\n" % Py2HelloWorldCmd.kPluginCmdName
-        )
-    raise
+    except Exception as e:
+        sys.stderr.write(f"Failed to unregister command: {Py2HelloWorldCmd.kPluginCmdName}\n")
+        raise e
