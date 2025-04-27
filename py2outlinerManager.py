@@ -13,18 +13,35 @@ def createUIWindow():
     mc.window('window', title="Outliner Manager", widthHeight=(100, 100))
 
     # add UI
+    # renamer
     mc.columnLayout( adjustableColumn=True )
+    renamer_text = mc.text( label="Auto Renamer", align="left")
+    name = mc.textField()
+    name_field = mc.textField( name , edit=True, enterCommand=('') )
+
+    # default colors
+    # mc.columnLayout( adjustableColumn=True )
+    dcolors_text = mc.text( label="Default Colors", align="left" )
 
     # default rgb color buttons
-    red = mc.button( bgc=(1, 0, 0) )
-    green = mc.button( bgc=(0, 1, 0) )
-    blue = mc.button( bgc=(0, 0, 1) )
+    mc.gridLayout()
+    red = mc.button( label="", bgc=(1, 0, 0) )
+    green = mc.button( label="", bgc=(0, 1, 0) )
+    blue = mc.button( label="", bgc=(0, 0, 1) )
 
-    # Custom colors and palettes
+    # custom colors and palettes
+    mc.columnLayout( adjustableColumn=True )
+    ccolors_text = mc.text( label="Custom Colors/Palettes", align="left" )
+
+    # custom color buttons (TODO: implement logic)
+    mc.gridLayout()
+    c1 = mc.button( label="", bgc=(1, 0, 0) )
+    c2 = mc.button( label="", bgc=(0, 1, 0) )
+    c3 = mc.button( label="", bgc=(0, 0, 1) )
 
     # show window
     mc.showWindow('window')
-
+    
 # get a button's background color
 def getButtonColor(button):
     return mc.button(button, query=True, bgc=True)

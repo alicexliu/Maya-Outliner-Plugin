@@ -11,7 +11,7 @@ Explanation of code structure
 Instructions to install and run the project
 ------------
 1. Download Autodesk Maya (Free for students)
-2. Set up the build environment/Maya Devkit (we used Maya 2025 Update 3 win64 DevKit)
+2. Set up the build environment/Maya Devkit (we used Maya 2025 Update 3 DevKit)
     * [Windows](https://help.autodesk.com/view/MAYADEV/2025/ENU/?guid=Maya_DEVHELP_Setting_up_your_build_Windows_environment_64_bit_html)
     * [Linux](https://help.autodesk.com/view/MAYADEV/2025/ENU/?guid=Maya_DEVHELP_Setting_up_your_build_Linux_environment_html)
     * [MacOS](https://help.autodesk.com/view/MAYADEV/2025/ENU/?guid=Maya_DEVHELP_Setting_up_your_build_Mac_OS_X_environment_html)
