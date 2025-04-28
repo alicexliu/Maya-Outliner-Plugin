@@ -1,6 +1,7 @@
 import sys
 import maya.cmds as cmds
 import maya.api.OpenMaya as om
+import maya.mel as mel
 
 def maya_useNewAPI():
     pass
@@ -10,7 +11,7 @@ def createUIWindow():
         cmds.deleteUI('window')
 
     # create window
-    cmds.window('window', title="Outliner Manager", widthHeight=(100, 100))
+    cmds.window('window', title="Outliner Manager", widthHeight=(240, 300))
 
     # layout
     cmds.columnLayout( adjustableColumn=True, rowSpacing=10, columnAlign="center" )
@@ -24,17 +25,26 @@ def createUIWindow():
     cmds.separator( height=10, style='in' )
 
     # default colors
-    # cmds.columnLayout( adjustableColumn=True )
     dcolors_text = cmds.text( label="Default Colors", align="left" )
 
     # default rgb color buttons
-    cmds.gridLayout(numberOfColumns=3, cellWidthHeight=(80, 40))
-    red = cmds.button( label="", bgc=(1, 0, 0) )
-    orange = cmds.button( label="", bgc=(1, 0.65, 0) )
-    yellow = cmds.button( label="", bgc=(1, 1, 0) )
-    green = cmds.button( label="", bgc=(0, 1, 0) )
-    blue = cmds.button( label="", bgc=(0, 0, 1) )
-    purple = cmds.button( label="", bgc=(0.5, 0, 0.5) )
+    cmds.gridLayout(numberOfColumns=6, cellWidthHeight=(40, 40))
+
+    default_colors = [
+        (1, 0, 0),     # Red
+        (1, 0.65, 0),  # Orange
+        (1, 1, 0),     # Yellow
+        (0, 1, 0),     # Green
+        (0, 0, 1),     # Blue
+        (0.77, 0.33, 1.0)  # Purple
+    ]
+
+    for color in default_colors:
+        cmds.button(
+            label="", 
+            bgc=color, 
+            command=lambda *args, col = color: setOutlinerColor(col)
+        )
 
     cmds.setParent('..')
     cmds.separator( height=10, style='in' )
@@ -44,7 +54,7 @@ def createUIWindow():
     ccolors_text = cmds.text( label="Custom Colors/Palettes", align="left" )
 
     # custom color buttons (TODO: implement logic)
-    cmds.gridLayout( numberOfColumns=3, cellWidthHeight=(80, 40) )
+    cmds.gridLayout(numberOfColumns=6, cellWidthHeight=(40, 40))
     c1 = cmds.button( label="", bgc=(1, 0, 1) )
     c2 = cmds.button( label="", bgc=(1, 1, 0) )
     c3 = cmds.button( label="", bgc=(0, 1, 1) )
@@ -53,6 +63,8 @@ def createUIWindow():
     c6 = cmds.button( label="", bgc=(0, 1, 0) )
 
     cmds.setParent('..')
+
+    #cmds.colorEditor()
 
     # show window
     cmds.showWindow('window')
@@ -70,8 +82,23 @@ def getButtonColor(button):
     return cmds.button(button, query=True, bgc=True)
 
 # set a button's background color
-def setColor(button, color):
+def setButtonColor(button, color):
     cmds.button(button, edit=True, bgc=color)
+
+# set the outliner color of selected objects
+def setOutlinerColor(color):
+    selected_objs = cmds.ls(selection=True)
+
+    for obj in selected_objs:
+        cmds.setAttr(f"{obj}.useOutlinerColor", True)
+
+        # Set RGB components
+        cmds.setAttr(f"{obj}.outlinerColorR", color[0])
+        cmds.setAttr(f"{obj}.outlinerColorG", color[1])
+        cmds.setAttr(f"{obj}.outlinerColorB", color[2])
+
+        # Refresh Attribute Editor to show change
+        mel.eval(f"updateAE {obj}")
 
 # command
 class Py2OutlinerManagerCmd(om.MPxCommand):
