@@ -18,6 +18,6 @@ Instructions to install and run the project
 3. Load the plug-in: [Instructions](https://help.autodesk.com/view/MAYADEV/2025/ENU/?guid=Maya_DEVHELP_LoadingAndUnloadingPlugins_Loading_Samples_Plug_ins_Into_Maya_html)
 4. Open the Maya Script Editor, navigate to the Python tab, and run:
 ```
-import maya.cmds as mc
-mc.py2OutlinerManager()
+import maya.cmds as cmds
+cmds.py2OutlinerManager()
 ```
