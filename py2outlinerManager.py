@@ -5,6 +5,7 @@ import maya.mel as mel
 
 current_palette_index = 0
 target_button = None
+num_custom_colors = 17
 
 def maya_useNewAPI():
     pass
@@ -125,14 +126,14 @@ def applySelectedColor(color):
     else:
         slot_button = f'customColor_{current_palette_index}'
         cmds.button(slot_button, edit=True, bgc=color)        
-        current_palette_index = (current_palette_index + 1) % 5
+        current_palette_index = (current_palette_index + 1) % num_custom_colors
     
     cmds.refresh(force=True)
     saveCustomColors()
     setOutlinerColor(color)
 
 def saveCustomColors():
-    for i in range(5):
+    for i in range(num_custom_colors):
         button_name = f'customColor_{i}'
         if cmds.button(button_name, exists=True):
             color = cmds.button(button_name, query=True, bgc=True)
@@ -141,7 +142,7 @@ def saveCustomColors():
             cmds.optionVar(floatValue=(f'outlinerManager_customColorB_{i}', color[2]))
 
 def loadCustomColors():
-    for i in range(5):
+    for i in range(num_custom_colors):
         button_name = f'customColor_{i}'
         if cmds.button(button_name, exists=True):
             if cmds.optionVar(exists=f'outlinerManager_customColorR_{i}'):
@@ -202,9 +203,9 @@ def createUIWindow():
     
     # custom color buttons
     cmds.button('addColorButton', label="+", command=lambda *args: showColorSelector())
-    ccolors = [(0.5, 0.5, 0.5)] * 5
+    ccolors = [(0.5, 0.5, 0.5)] * num_custom_colors
     
-    for i in range(5):
+    for i in range(num_custom_colors):
         button_name = f'customColor_{i}'
         
         cmds.button(
@@ -216,6 +217,8 @@ def createUIWindow():
         pmenu = cmds.popupMenu()
         cmds.menuItem(label="Change Color", command=lambda *args, btn=button_name: showColorSelector(btn))
     
+    loadCustomColors()
+
     cmds.setParent('..')
 
     #cmds.colorEditor()
