@@ -3,8 +3,153 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om
 import maya.mel as mel
 
+current_palette_index = 0
+target_button = None
+
 def maya_useNewAPI():
     pass
+
+def showColorSelector(button=None):
+    global target_button
+    target_button = button
+    
+    if cmds.window('colorPickerWindow', exists=True):
+        cmds.deleteUI('colorPickerWindow')
+        
+    # color picker window pop up
+    cmds.window('colorPickerWindow', title="Color Selector", widthHeight=(300, 300))
+    cmds.columnLayout(adjustableColumn=True, rowSpacing=5)
+    
+    cmds.text(label="Select a color:")
+
+    cmds.gridLayout(numberOfColumns=6, cellWidthHeight=(40, 40))
+    
+    # preset color options for easy edit
+    colors = [
+        (0.8, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 0.3, 0.3), 
+        (1.0, 0.4, 0.0), (1.0, 0.6, 0.0), (1.0, 0.8, 0.0),
+        (1.0, 1.0, 0.0), (0.8, 1.0, 0.0), (0.6, 1.0, 0.0),
+        (0.0, 0.8, 0.0), (0.0, 1.0, 0.0), (0.0, 1.0, 0.4),
+        (0.0, 0.6, 1.0), (0.0, 0.4, 1.0), (0.0, 0.0, 1.0),
+        (0.4, 0.0, 1.0), (0.6, 0.0, 1.0), (0.8, 0.0, 1.0),
+        (0.2, 0.2, 0.2), (0.4, 0.4, 0.4), (0.6, 0.6, 0.6),
+    ]
+    
+    for color in colors:
+        cmds.button(
+            label="",
+            bgc=color,
+            command=lambda *args, c=color: applySelectedColor(c)
+        )
+        
+    cmds.setParent('..')
+    
+    # custom RGB input
+    cmds.separator(height=10, style='in')
+    cmds.text(label="Custom RGB values:")
+    
+    # sliders (rgb)
+    cmds.columnLayout(
+        adjustableColumn=True,
+        rowSpacing=5,
+        columnAttach=('both', 8),
+        columnAlign='left'
+    )
+
+    r_slider = cmds.floatSliderGrp(
+        label="R", field=True,
+        minValue=0.0, maxValue=1.0,
+        fieldMinValue=0.0, fieldMaxValue=1.0,
+        value=1.0,
+        columnWidth=[(1, 18), (2, 40), (3, 50), (4, 120)]
+    )
+
+    g_slider = cmds.floatSliderGrp(
+        label="G", field=True,
+        minValue=0.0, maxValue=1.0,
+        fieldMinValue=0.0, fieldMaxValue=1.0,
+        value=0.0,
+        columnWidth=[(1, 18), (2, 40), (3, 50), (4, 120)]
+    )
+
+    b_slider = cmds.floatSliderGrp(
+        label="B", field=True,
+        minValue=0.0, maxValue=1.0,
+        fieldMinValue=0.0, fieldMaxValue=1.0,
+        value=0.0,
+        columnWidth=[(1, 18), (2, 40), (3, 50), (4, 120)]
+    )
+
+    # preview button
+    cmds.frameLayout(label="Preview", collapsable=False)
+    preview_button = cmds.button('colorPreview', label="", height=40, bgc=(1.0, 0.0, 0.0))
+    cmds.setParent('..')
+    
+    # updating preview button color
+    cmds.floatSliderGrp(r_slider, edit=True, 
+                       changeCommand=lambda *args: updatePreview(r_slider, g_slider, b_slider))
+    cmds.floatSliderGrp(g_slider, edit=True, 
+                       changeCommand=lambda *args: updatePreview(r_slider, g_slider, b_slider))
+    cmds.floatSliderGrp(b_slider, edit=True, 
+                       changeCommand=lambda *args: updatePreview(r_slider, g_slider, b_slider))
+    
+    cmds.button(label="Apply Custom Color", command=lambda *args: applyCustomColor(r_slider, g_slider, b_slider))
+    
+    cmds.button(label="Cancel", command=lambda *args: cmds.deleteUI('colorPickerWindow'))
+    
+    cmds.showWindow('colorPickerWindow')
+
+def updatePreview(r_slider, g_slider, b_slider):
+    r = cmds.floatSliderGrp(r_slider, query=True, value=True)
+    g = cmds.floatSliderGrp(g_slider, query=True, value=True)
+    b = cmds.floatSliderGrp(b_slider, query=True, value=True)
+    
+    cmds.button('colorPreview', edit=True, bgc=(r, g, b))
+
+def applyCustomColor(r_slider, g_slider, b_slider):
+    r = cmds.floatSliderGrp(r_slider, query=True, value=True)
+    g = cmds.floatSliderGrp(g_slider, query=True, value=True)
+    b = cmds.floatSliderGrp(b_slider, query=True, value=True)
+    
+    applySelectedColor((r, g, b))
+
+def applySelectedColor(color):
+    global target_button, current_palette_index
+    
+    if cmds.window('colorPickerWindow', exists=True):
+        cmds.deleteUI('colorPickerWindow')
+    
+    if target_button:
+        if cmds.button(target_button, exists=True):
+            cmds.button(target_button, edit=True, bgc=color)
+    else:
+        slot_button = f'customColor_{current_palette_index}'
+        cmds.button(slot_button, edit=True, bgc=color)        
+        current_palette_index = (current_palette_index + 1) % 5
+    
+    cmds.refresh(force=True)
+    saveCustomColors()
+    setOutlinerColor(color)
+
+def saveCustomColors():
+    for i in range(5):
+        button_name = f'customColor_{i}'
+        if cmds.button(button_name, exists=True):
+            color = cmds.button(button_name, query=True, bgc=True)
+            cmds.optionVar(floatValue=(f'outlinerManager_customColorR_{i}', color[0]))
+            cmds.optionVar(floatValue=(f'outlinerManager_customColorG_{i}', color[1]))
+            cmds.optionVar(floatValue=(f'outlinerManager_customColorB_{i}', color[2]))
+
+def loadCustomColors():
+    for i in range(5):
+        button_name = f'customColor_{i}'
+        if cmds.button(button_name, exists=True):
+            if cmds.optionVar(exists=f'outlinerManager_customColorR_{i}'):
+                r = cmds.optionVar(query=f'outlinerManager_customColorR_{i}')
+                g = cmds.optionVar(query=f'outlinerManager_customColorG_{i}')
+                b = cmds.optionVar(query=f'outlinerManager_customColorB_{i}')
+                cmds.button(button_name, edit=True, bgc=(r, g, b))
+
 
 def createUIWindow():
     if cmds.window('window', exists=True):
@@ -39,11 +184,12 @@ def createUIWindow():
         (0.77, 0.33, 1.0)  # Purple
     ]
 
-    for color in default_colors:
+    for idx, color in enumerate(default_colors):
         cmds.button(
+            f'defaultColor_{idx}',
             label="", 
             bgc=color, 
-            command=lambda *args, col = color: setOutlinerColor(col)
+            command=lambda *args, col=color: setOutlinerColor(col)
         )
 
     cmds.setParent('..')
@@ -52,16 +198,24 @@ def createUIWindow():
     # custom colors and palettes
     cmds.columnLayout( adjustableColumn=True )
     ccolors_text = cmds.text( label="Custom Colors/Palettes", align="left" )
-
-    # custom color buttons (TODO: implement logic)
-    cmds.gridLayout(numberOfColumns=6, cellWidthHeight=(40, 40))
-    c1 = cmds.button( label="", bgc=(1, 0, 1) )
-    c2 = cmds.button( label="", bgc=(1, 1, 0) )
-    c3 = cmds.button( label="", bgc=(0, 1, 1) )
-    c4 = cmds.button( label="", bgc=(1, 0, 0) )
-    c5 = cmds.button( label="", bgc=(0, 0, 1) )
-    c6 = cmds.button( label="", bgc=(0, 1, 0) )
-
+    cmds.gridLayout('customColorGrid', numberOfColumns=6, cellWidthHeight=(40, 40))
+    
+    # custom color buttons
+    cmds.button('addColorButton', label="+", command=lambda *args: showColorSelector())
+    ccolors = [(0.5, 0.5, 0.5)] * 5
+    
+    for i in range(5):
+        button_name = f'customColor_{i}'
+        
+        cmds.button(
+            button_name,
+            label="", 
+            bgc=ccolors[i],
+            command=lambda *args, btn=button_name: setOutlinerColor(cmds.button(btn, query=True, bgc=True))
+        )
+        pmenu = cmds.popupMenu()
+        cmds.menuItem(label="Change Color", command=lambda *args, btn=button_name: showColorSelector(btn))
+    
     cmds.setParent('..')
 
     #cmds.colorEditor()
@@ -77,13 +231,13 @@ def renameObjs(name_field):
     for idx, obj in enumerate(selected_objs):
         cmds.rename(obj, f"{new_name}_{idx}")
 
-# get a button's background color
-def getButtonColor(button):
-    return cmds.button(button, query=True, bgc=True)
+# # get a button's background color
+# def getButtonColor(button):
+#     return cmds.button(button, query=True, bgc=True)
 
-# set a button's background color
-def setButtonColor(button, color):
-    cmds.button(button, edit=True, bgc=color)
+# # set a button's background color
+# def setButtonColor(button, color):
+#     cmds.button(button, edit=True, bgc=color)
 
 # set the outliner color of selected objects
 def setOutlinerColor(color):
