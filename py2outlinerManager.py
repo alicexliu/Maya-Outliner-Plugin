@@ -114,7 +114,7 @@ class Py2OutlinerManagerCmd(om.MPxCommand):
     def doIt(self, args):
         createUIWindow()
 
-# initialize plug=in
+# initialize plug-in
 def initializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:
@@ -126,7 +126,7 @@ def initializePlugin(plugin):
         sys.stderr.write(f"Failed to register command: {Py2OutlinerManagerCmd.kPluginCmdName}\n")
         raise e
 
-# uninitialize plug=in
+# uninitialize plug-in
 def uninitializePlugin(plugin):
     pluginFn = om.MFnPlugin(plugin)
     try:

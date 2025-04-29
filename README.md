@@ -2,13 +2,13 @@
 
 Description
 ------------
-Maya outliner manager that allows users to easily color and rename objects 
+Maya outliner manager plugin that allows users to easily color and rename objects in one place.
 
-Explanation of code structure
+Explanation of Code Structure
 ------------
 
 
-Instructions to install and run the project
+Instructions to Install and Run the Project
 ------------
 1. Download Autodesk Maya (Free for students)
 2. Set up the build environment/Maya Devkit (we used Maya 2025 Update 3 DevKit)
