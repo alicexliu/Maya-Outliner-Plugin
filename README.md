@@ -6,7 +6,9 @@ Maya outliner manager plugin that allows users to easily color and rename object
 
 Explanation of Code Structure
 ------------
-
+* UI – createUIWindow() builds the main window; showColorSelector() pops the colour picker. Everything visual is created here.
+* Logic – helper functions handle colour choice (applySelectedColor, updatePreview, save/loadCustomColors, setOutlinerColor) and batch renaming (renameObjs). A couple of globals track which custom-colour slot is active.
+* Plug-in shell – Py2OutlinerManagerCmd (an MPxCommand) launches the UI, while initializePlugin / uninitializePlugin register or remove the command. maya_useNewAPI() flags the file for Python API 2.0.
 
 Instructions to Install and Run the Project
 ------------
